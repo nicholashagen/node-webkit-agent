@@ -23,12 +23,15 @@ var DevToolsAgent = module.exports = function() {
      *
      * @api private
      **/
-    this.spawnProxy = function() {
+    this.spawnProxy = function(localPort, debugPort) {
         var self = this;
 
         //Parent PID for the proxy to know to whom to send the SIGUSR1 signal
         process.env.PARENT_PID = process.pid;
+        process.env.DEBUG_PORT = debugPort || 9999;
+        process.env.BACKEND_PORT = localPort || 3333;
 
+        console.log('SPAWNING PROCESS...');
         this.proxy = spawn(__dirname + '/webkit-devtools-agent.js', process.argv, {
             env: process.env,
             cwd: __dirname
@@ -133,13 +136,13 @@ var DevToolsAgent = module.exports = function() {
      *
      * @api public
      **/
-    this.start = function() {
+    this.start = function(localPort, debugPort) {
         var self = this;
 
         if (this.server) return;
 
         this.server = new WebSocketServer({
-            port: 3333,
+            port: localPort || 3333,
             host: 'localhost'
         });
 
@@ -148,7 +151,7 @@ var DevToolsAgent = module.exports = function() {
             'service process...');
 
             //Spawns webkit devtools proxy / websockets server
-            self.spawnProxy();
+            self.spawnProxy(localPort, debugPort);
 
             self.loadAgents();
         });

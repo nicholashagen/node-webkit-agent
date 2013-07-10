@@ -10,6 +10,7 @@ var DevToolsAgentProxy = module.exports = function() {
     this.debuggerAgent = null;
     this.port = process.env.DEBUG_PORT || 9999;
     this.host = process.env.DEBUG_HOST || '0.0.0.0';
+    this.backendPort = process.env.BACKEND_PORT || 3333;
 };
 
 (function() {
@@ -120,7 +121,8 @@ var DevToolsAgentProxy = module.exports = function() {
      * @api public
      **/
     this.start = function() {
-        this.backend = new WebSocket('ws://localhost:3333');
+        console.log('Starting WS proxy...');
+        this.backend = new WebSocket('ws://localhost:' + this.backendPort);
         this.backend.on('open', this.onBackendOpen.bind(this));
         this.backend.on('message', this.onBackendMessage.bind(this));
     };
